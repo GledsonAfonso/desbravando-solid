@@ -2,8 +2,6 @@
 
 Markdown ebooks converter to formats like EPUB and PDF.
 
-Made in Java.
-
 ## Requirements:
 
 - Java 17+
