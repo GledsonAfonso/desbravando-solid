@@ -3,47 +3,45 @@ package cotuba;
 import java.nio.file.Path;
 
 public class Main {
-
   public static void main(String[] args) {
-    Path diretorioDosMD;
-    String formato;
-    Path arquivoDeSaida;
-    boolean modoVerboso = false;
+    Path markdownPath;
+    String format;
+    Path outputPath;
+    boolean verboseModeEnabled = false;
 
     try {
-      var opcoesCLI = new LeitorOpcoesCLI(args);
-      diretorioDosMD = opcoesCLI.getDiretorioDosMD();
-      formato = opcoesCLI.getFormato();
-      arquivoDeSaida = opcoesCLI.getArquivoDeSaida();
-      modoVerboso = opcoesCLI.isModoVerboso();
+      var cli = new Cli(args);
+      markdownPath = cli.getMarkdownPath();
+      format = cli.getFormat();
+      outputPath = cli.getOutputPath();
+      verboseModeEnabled = cli.isVerboseModeEnabled();
 
-      var renderizador = new RenderizadorMDParaHTML();
-      var capitulos = renderizador.renderiza(diretorioDosMD);
+      var render = new HtmlRender();
+      var chapters = render.render(markdownPath);
 
       var ebook = new Ebook();
-      ebook.setFormato(formato);
-      ebook.setArquivoDeSaida(arquivoDeSaida);
-      ebook.setCapitulos(capitulos);
+      ebook.setFormat(format);
+      ebook.setOutputPath(outputPath);
+      ebook.setChapters(chapters);
 
-      if ("pdf".equals(formato)) {
-        var geradorPDF = new GeradorPDF();
-        geradorPDF.gera(ebook);
-      } else if ("epub".equals(formato)) {
-        var geradorEPUB = new GeradorEPUB();
-        geradorEPUB.gera(ebook);
+      if ("pdf".equals(format)) {
+        var pdfGenerator = new PdfGenerator();
+        pdfGenerator.generate(ebook);
+      } else if ("epub".equals(format)) {
+        var epubGenerator = new EpubGenerator();
+        epubGenerator.generate(ebook);
       } else {
-        throw new IllegalArgumentException("Formato do ebook inválido: " + formato);
+        throw new IllegalArgumentException("Invalid ebook format: " + format);
       }
 
-      System.out.println("Arquivo gerado com sucesso: " + arquivoDeSaida);
+      System.out.println("File created with success: " + outputPath);
 
-    } catch (Exception ex) {
-      System.err.println(ex.getMessage());
-      if (modoVerboso) {
-        ex.printStackTrace();
+    } catch (Exception exception) {
+      System.err.println(exception.getMessage());
+      if (verboseModeEnabled) {
+        exception.printStackTrace();
       }
       System.exit(1);
     }
   }
-
 }

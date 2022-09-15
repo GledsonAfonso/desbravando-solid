@@ -12,28 +12,28 @@ import com.itextpdf.layout.element.IBlockElement;
 import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.property.AreaBreakType;
 
-public class GeradorPDF {
-  public void gera(Ebook ebook) {
-    var arquivoDeSaida = ebook.getArquivoDeSaida();
+public class PdfGenerator {
+  public void generate(Ebook ebook) {
+    var outputPath = ebook.getOutputPath();
 
     try (
-        var writer = new PdfWriter(Files.newOutputStream(arquivoDeSaida));
+        var writer = new PdfWriter(Files.newOutputStream(outputPath));
         var pdf = new PdfDocument(writer);
         var pdfDocument = new Document(pdf)) {
 
-      for (var capitulo : ebook.getCapitulos()) {
-        var html = capitulo.getConteudoHTML();
+      for (var chapter : ebook.getChapters()) {
+        var html = chapter.getHtml();
         List<IElement> convertToElements = HtmlConverter.convertToElements(html);
         for (IElement element : convertToElements) {
           pdfDocument.add((IBlockElement) element);
         }
   
-        if (!ebook.isUltimoCapitulo(capitulo)) {
+        if (!ebook.isLastChapter(chapter)) {
           pdfDocument.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
         }
       };
-    } catch (Exception ex) {
-      throw new IllegalStateException("Erro ao criar arquivo PDF: " + arquivoDeSaida.toAbsolutePath(), ex);
+    } catch (Exception exception) {
+      throw new IllegalStateException("Error while trying to create the PDF file: " + outputPath.toAbsolutePath(), exception);
     }
   }
 }
