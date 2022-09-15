@@ -49,10 +49,8 @@ public class Cli {
       try {
         cmd = cmdParser.parse(options, args);
       } catch (ParseException exception) {
-        System.err.println(exception.getMessage());
         help.printHelp("cotuba", options);
-        System.exit(1);
-        return;
+        throw new IllegalArgumentException("Invalid option!", exception);
       }
 
       String markdownDirectory = cmd.getOptionValue("dir");
