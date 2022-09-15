@@ -32,4 +32,8 @@ public class Ebook {
     this.capitulos = capitulos;
   }
 
+  public boolean isUltimoCapitulo(Capitulo capitulo) {
+    return this.capitulos.get(this.capitulos.size() - 1).equals(capitulo);
+  }
+
 }

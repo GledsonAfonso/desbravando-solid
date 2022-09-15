@@ -1,7 +1,6 @@
 package cotuba;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 import com.itextpdf.html2pdf.HtmlConverter;
@@ -14,20 +13,25 @@ import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.property.AreaBreakType;
 
 public class GeradorPDF {
-  public void gera(Path diretorioDosMD, Path arquivoDeSaida) {
+  public void gera(Ebook ebook) {
+    var arquivoDeSaida = ebook.getArquivoDeSaida();
+
     try (
         var writer = new PdfWriter(Files.newOutputStream(arquivoDeSaida));
         var pdf = new PdfDocument(writer);
         var pdfDocument = new Document(pdf)) {
 
-      List<IElement> convertToElements = HtmlConverter.convertToElements(html);
-      for (IElement element : convertToElements) {
-        pdfDocument.add((IBlockElement) element);
-      }
-
-      // TODO: não adicionar página depois do último capítulo
-      pdfDocument.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
-
+      for (var capitulo : ebook.getCapitulos()) {
+        var html = capitulo.getConteudoHTML();
+        List<IElement> convertToElements = HtmlConverter.convertToElements(html);
+        for (IElement element : convertToElements) {
+          pdfDocument.add((IBlockElement) element);
+        }
+  
+        if (!ebook.isUltimoCapitulo(capitulo)) {
+          pdfDocument.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+        }
+      };
     } catch (Exception ex) {
       throw new IllegalStateException("Erro ao criar arquivo PDF: " + arquivoDeSaida.toAbsolutePath(), ex);
     }

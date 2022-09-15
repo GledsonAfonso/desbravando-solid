@@ -17,12 +17,20 @@ public class Main {
       arquivoDeSaida = opcoesCLI.getArquivoDeSaida();
       modoVerboso = opcoesCLI.isModoVerboso();
 
+      var renderizador = new RenderizadorMDParaHTML();
+      var capitulos = renderizador.renderiza(diretorioDosMD);
+
+      var ebook = new Ebook();
+      ebook.setFormato(formato);
+      ebook.setArquivoDeSaida(arquivoDeSaida);
+      ebook.setCapitulos(capitulos);
+
       if ("pdf".equals(formato)) {
         var geradorPDF = new GeradorPDF();
-        geradorPDF.gera(diretorioDosMD, arquivoDeSaida);
+        geradorPDF.gera(ebook);
       } else if ("epub".equals(formato)) {
         var geradorEPUB = new GeradorEPUB();
-        geradorEPUB.gera(diretorioDosMD, arquivoDeSaida);
+        geradorEPUB.gera(ebook);
       } else {
         throw new IllegalArgumentException("Formato do ebook inválido: " + formato);
       }
