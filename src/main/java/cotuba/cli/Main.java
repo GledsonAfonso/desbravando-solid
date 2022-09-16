@@ -4,11 +4,11 @@ import cotuba.application.Orchestrator;
 
 public class Main {
   public static void main(String[] args) {
-    boolean verboseModeEnabled = false;
+    boolean verboseMode = false;
 
     try {
       var cli = new Cli(args);
-      verboseModeEnabled = cli.isVerboseModeEnabled();
+      verboseMode = cli.isVerboseMode();
 
       var orchestrator = new Orchestrator();
       orchestrator.execute(cli);
@@ -17,7 +17,7 @@ public class Main {
 
     } catch (Exception exception) {
       System.err.println(exception.getMessage());
-      if (verboseModeEnabled) {
+      if (verboseMode) {
         exception.printStackTrace();
       }
       System.exit(1);

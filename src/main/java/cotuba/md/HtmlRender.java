@@ -4,15 +4,10 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
-import org.commonmark.node.AbstractVisitor;
-import org.commonmark.node.Heading;
 import org.commonmark.node.Node;
-import org.commonmark.node.Text;
+import org.commonmark.node.Visitor;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
@@ -20,52 +15,50 @@ import cotuba.domain.Chapter;
 
 public class HtmlRender {
   public List<Chapter> render(Path markdownPath) {
-    List<Chapter> chapters = new ArrayList<>();
+    return this.getMarkdownPaths(markdownPath)
+        .stream()
+        .map(markdownFile -> {
+          var nodeVisitor = new NodeVisitor();
+          var document = this.getDocument(markdownFile, nodeVisitor);
+          var html = this.getHtml(markdownFile, document);
 
-    PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/*.md");
-    try (Stream<Path> markdownFiles = Files.list(markdownPath)) {
-      markdownFiles
-          .filter(matcher::matches)
-          .sorted()
-          .forEach(markdownFile -> {
-            Chapter chapter = new Chapter();
-            Parser parser = Parser.builder().build();
-            Node document = null;
-            try {
-              document = parser.parseReader(Files.newBufferedReader(markdownFile));
-              document.accept(new AbstractVisitor() {
-                @Override
-                public void visit(Heading heading) {
-                  if (heading.getLevel() == 1) {
-                    // chapter
-                    String title = ((Text) heading.getFirstChild()).getLiteral();
-                    chapter.setTitle(title);
-                  } else if (heading.getLevel() == 2) {
-                    // section
-                  } else if (heading.getLevel() == 3) {
-                    // title
-                  }
-                }
+          var chapter = nodeVisitor.getChapter();
+          chapter.setHtml(html);
 
-              });
-            } catch (Exception exception) {
-              throw new IllegalStateException("Error while trying to parse the file " + markdownFile, exception);
-            }
+          return chapter;
+        })
+        .toList();
+  }
 
-            try {
-              HtmlRenderer renderer = HtmlRenderer.builder().build();
-              String html = renderer.render(document);
-
-              chapter.setHtml(html);
-              chapters.add(chapter);
-            } catch (Exception exception) {
-              throw new IllegalStateException("Error while trying to render the file to HTML. File " + markdownFile, exception);
-            }
-          });
+  private List<Path> getMarkdownPaths(Path directoryPath) {
+    try {
+      var matcher = FileSystems.getDefault().getPathMatcher("glob:**/*.md");
+      return Files.list(directoryPath).filter(matcher::matches).sorted().toList();
     } catch (IOException exception) {
-      throw new IllegalStateException("Error while trying to find the markdown files in " + markdownPath.toAbsolutePath(), exception);
+      throw new IllegalStateException(
+          "Error while trying to find the markdown files in " + directoryPath.toAbsolutePath(), exception);
     }
+  }
 
-    return chapters;
+  private Node getDocument(Path markdownFile, Visitor visitor) {
+    try {
+      var parser = Parser.builder().build();
+      var document = parser.parseReader(Files.newBufferedReader(markdownFile));
+      document.accept(visitor);
+
+      return document;
+    } catch (Exception exception) {
+      throw new IllegalStateException("Error while trying to parse the file " + markdownFile, exception);
+    }
+  }
+
+  private String getHtml(Path markdownFile, Node document) {
+    try {
+      var renderer = HtmlRenderer.builder().build();
+      return renderer.render(document);
+    } catch (Exception exception) {
+      throw new IllegalStateException("Error while trying to render the file to HTML. File " + markdownFile,
+          exception);
+    }
   }
 }
