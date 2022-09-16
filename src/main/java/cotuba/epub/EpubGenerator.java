@@ -1,8 +1,9 @@
-package cotuba;
+package cotuba.epub;
 
 import java.io.IOException;
 import java.nio.file.Files;
 
+import cotuba.domain.Ebook;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.epub.EpubWriter;

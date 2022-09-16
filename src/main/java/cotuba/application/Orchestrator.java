@@ -1,4 +1,10 @@
-package cotuba;
+package cotuba.application;
+
+import cotuba.cli.Cli;
+import cotuba.domain.Ebook;
+import cotuba.epub.EpubGenerator;
+import cotuba.md.HtmlRender;
+import cotuba.pdf.PdfGenerator;
 
 public class Orchestrator {
   public void execute(Cli cli) {

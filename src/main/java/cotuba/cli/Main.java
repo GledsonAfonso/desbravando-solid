@@ -1,4 +1,6 @@
-package cotuba;
+package cotuba.cli;
+
+import cotuba.application.Orchestrator;
 
 public class Main {
   public static void main(String[] args) {
